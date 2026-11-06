@@ -1,7 +1,7 @@
 // HODOR - Modern Library attendance system
 // ضع بيانات مشروع Supabase هنا بعد إنشاء المشروع.
-const SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR-SUPABASE-ANON-KEY";
+const SUPABASE_URL = "https://qhxzdcazlwpuemdxibmt.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_fPjlAK21Q-icH7d6L3mfqg_aaOhk0aC";
 const sbReady = !SUPABASE_URL.includes("YOUR-PROJECT") && !SUPABASE_ANON_KEY.includes("YOUR-SUPABASE");
 const db = sbReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 let currentUser=null, profile=null, settings=null, attendanceCache=[], employeesCache=[], qrScanner=null, currentQrToken=null;
