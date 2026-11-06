@@ -3,7 +3,7 @@
 const SUPABASE_URL = "https://qhxzdcazlwpuemdxibmt.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_fPjlAK21Q-icH7d6L3mfqg_aaOhk0aC";
 const sbReady = !SUPABASE_URL.includes("YOUR-PROJECT") && !SUPABASE_ANON_KEY.includes("YOUR-SUPABASE");
-const db = sbReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const db = sbReady && window.supabase?.createClient ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 let currentUser=null, profile=null, settings=null, attendanceCache=[], employeesCache=[], qrScanner=null, currentQrToken=null;
 const $ = id => document.getElementById(id);
 const fmtTime = v => v ? new Date(v).toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit"}) : "—";
@@ -17,9 +17,23 @@ function duration(a,b){if(!a||!b)return "—";let n=Math.max(0,(new Date(b)-new 
 function localISODate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function showLogin(){ $("loginView").classList.remove("hidden");$("appView").classList.add("hidden")}
 function showApp(){ $("loginView").classList.add("hidden");$("appView").classList.remove("hidden")}
-async function login(e){e.preventDefault();if(!db){$("loginError").textContent="أضف بيانات Supabase داخل app.js أولاً ثم أعد تحميل الصفحة.";return}
- const {data,error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
- if(error){$("loginError").textContent=error.message;return} currentUser=data.user;await boot()}
+async function login(e){
+ e.preventDefault();
+ const errBox=$("loginError"), btn=$("loginForm").querySelector('button[type="submit"]');
+ errBox.textContent="";
+ if(!db){errBox.textContent="تعذر تحميل مكتبة الاتصال أو بيانات Supabase. حدّث الصفحة، ولو استمرت المشكلة ابعتلي صورة.";return}
+ btn.disabled=true;btn.textContent="جاري تسجيل الدخول...";
+ try{
+   const {data,error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+   if(error) throw error;
+   if(!data.user) throw Error("لم يتم إرجاع بيانات الحساب");
+   currentUser=data.user;
+   await boot();
+ }catch(error){
+   errBox.textContent=error.message||"حصل خطأ غير معروف أثناء تسجيل الدخول";
+   console.error("HODOR login error:",error);
+ }finally{btn.disabled=false;btn.textContent="تسجيل الدخول"}
+}
 async function boot(){const {data,error}=await db.from("profiles").select("*").eq("id",currentUser.id).single();if(error||!data){fail("الحساب غير مربوط بملف موظف. تواصل مع المدير.");await db.auth.signOut();return}
  profile=data;showApp();$("userName").textContent=profile.full_name;$("welcomeName").textContent="أهلاً، "+profile.full_name;$("avatar").textContent=profile.full_name?.[0]||"م";$("userRole").textContent=profile.role==="admin"?"مدير النظام":"موظف";
  document.querySelectorAll(".admin-only").forEach(x=>x.classList.toggle("hidden",profile.role!=="admin"));
@@ -55,4 +69,9 @@ $("checkInBtn").addEventListener("click",()=>doAttendance("in"));$("checkOutBtn"
 document.querySelectorAll('input[name="method"]').forEach(r=>r.addEventListener("change",()=>{$("qrArea").classList.toggle("hidden",getMethod()!=="qr")}));
 $("scanBtn").addEventListener("click",startScan);$("generateQr").addEventListener("click",generateQR);$("settingsForm").addEventListener("submit",saveSettings);$("employeeForm").addEventListener("submit",addEmployee);$("filterBtn").addEventListener("click",loadReports);$("exportBtn").addEventListener("click",exportCSV);
 setInterval(clock,1000);clock();
-if(db){db.auth.getSession().then(({data})=>{if(data.session){currentUser=data.session.user;boot()}})}else{$("loginError").textContent="للبدء: أنشئ مشروع Supabase، ثم ضع رابط المشروع ومفتاح anon داخل app.js."}
+if(db){
+ db.auth.getSession().then(({data,error})=>{
+   if(error){$("loginError").textContent="تعذر الاتصال بخدمة تسجيل الدخول: "+error.message;return}
+   if(data.session){currentUser=data.session.user;boot().catch(e=>{$("loginError").textContent=e.message||"تعذر تحميل حسابك";console.error(e)})}
+ }).catch(e=>{$("loginError").textContent="تعذر الاتصال: "+(e.message||e);console.error(e)});
+}else{$("loginError").textContent="مكتبة Supabase لم تُحمّل. تأكد من اتصال الإنترنت ثم حدّث الصفحة."}
