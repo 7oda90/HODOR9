@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>HODOR | الحضور والانصراف</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <main id="loginView" class="login-wrap">
+    <section class="login-card">
+      <div class="brand-mark">H</div><div class="eyebrow">المكتبة الحديثة</div>
+      <h1>HODOR</h1><p class="muted">نظام الحضور والانصراف الذكي</p>
+      <form id="loginForm">
+        <label>البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" required placeholder="name@example.com">
+        <label>كلمة المرور</label><input id="password" type="password" autocomplete="current-password" required placeholder="••••••••">
+        <button class="btn primary full" type="submit">تسجيل الدخول</button>
+      </form>
+      <p class="tiny muted">حسابات الموظفين ينشئها المدير مسبقاً.</p>
+      <p id="loginError" class="error"></p>
+    </section>
+  </main>
+
+  <div id="appView" class="app hidden">
+    <aside class="sidebar">
+      <div class="side-brand"><div class="brand-mark small">H</div><div><b>HODOR</b><small>المكتبة الحديثة</small></div></div>
+      <nav>
+        <button class="nav active" data-page="overview">▦ <span>الرئيسية</span></button>
+        <button class="nav" data-page="attendance">◷ <span>تسجيل الحضور</span></button>
+        <button class="nav admin-only" data-page="employees">♙ <span>الموظفون</span></button>
+        <button class="nav admin-only" data-page="reports">▤ <span>التقارير</span></button>
+        <button class="nav admin-only" data-page="settings">⚙ <span>الإعدادات و QR</span></button>
+      </nav>
+      <div class="side-bottom"><div class="online-dot"></div><span>متصل بالنظام</span><button id="logoutBtn" class="logout">تسجيل الخروج ↗</button></div>
+    </aside>
+
+    <section class="main">
+      <header class="topbar"><div><div class="eyebrow">لوحة التحكم</div><h2 id="pageTitle">نظرة عامة</h2></div>
+        <div class="user-chip"><div class="avatar" id="avatar">م</div><div><b id="userName">المستخدم</b><small id="userRole">موظف</small></div></div>
+      </header>
+
+      <section id="page-overview" class="page">
+        <div class="welcome"><div><span class="eyebrow light">أهلاً بيك في HODOR</span><h2 id="welcomeName">أهلاً بك</h2><p>تابع حالة الحضور وساعات العمل من مكان واحد.</p></div><div class="welcome-date" id="todayDate"></div></div>
+        <div class="stats">
+          <article class="stat"><span>حاضرون الآن</span><strong id="statPresent">—</strong><small>مسجلون اليوم</small></article>
+          <article class="stat"><span>متأخرون</span><strong id="statLate">—</strong><small>بعد موعد بداية الدوام</small></article>
+          <article class="stat"><span>انصرفوا</span><strong id="statLeft">—</strong><small>أنهوا يوم العمل</small></article>
+          <article class="stat"><span>إجمالي الموظفين</span><strong id="statEmployees">—</strong><small>حسابات نشطة</small></article>
+        </div>
+        <div class="section-head"><div><h3>حالة اليوم</h3><p class="muted">آخر سجلات الحضور والانصراف</p></div><button class="btn secondary" data-goto="reports">عرض التقارير</button></div>
+        <div class="table-card"><div class="table-scroll"><table><thead><tr><th>الموظف</th><th>الحضور</th><th>الانصراف</th><th>ساعات العمل</th><th>الحالة</th></tr></thead><tbody id="todayRows"><tr><td colspan="5" class="empty">لا توجد بيانات بعد</td></tr></tbody></table></div></div>
+      </section>
+
+      <section id="page-attendance" class="page hidden">
+        <div class="attendance-grid">
+          <article class="panel clock-panel"><div class="eyebrow">تسجيل اليوم</div><div id="liveClock" class="clock">--:--:--</div><div id="liveDate" class="muted"></div>
+            <div class="status-pill" id="myStatus">لم تسجل حضورك اليوم</div>
+            <div class="action-buttons"><button id="checkInBtn" class="btn primary">تسجيل الحضور</button><button id="checkOutBtn" class="btn dark" disabled>تسجيل الانصراف</button></div>
+            <p class="tiny muted">يتم حفظ وقت العملية تلقائياً على قاعدة البيانات.</p>
+          </article>
+          <article class="panel"><h3>طريقة التسجيل</h3><p class="muted">اختر الطريقة المعتمدة من إدارة المكتبة.</p>
+            <label class="radio-line"><input type="radio" name="method" value="button" checked> من حساب الموظف</label>
+            <label class="radio-line"><input type="radio" name="method" value="gps"> التحقق من موقع العمل GPS</label>
+            <label class="radio-line"><input type="radio" name="method" value="qr"> مسح QR + GPS</label>
+            <div id="qrArea" class="qr-area hidden"><div id="qrReader" class="qr-reader"></div><button id="scanBtn" class="btn secondary full">فتح الكاميرا ومسح QR</button><p class="tiny muted">اسمح للمتصفح باستخدام الكاميرا.</p></div>
+            <div class="notice">لو فعّلت الإدارة GPS أو QR، لازم تسمح بالوصول للموقع. استخدم الموقع أثناء وجودك في مقر العمل فقط.</div>
+          </article>
+        </div>
+        <article class="panel"><h3>سجلي لهذا الشهر</h3><div class="table-scroll"><table><thead><tr><th>التاريخ</th><th>الحضور</th><th>الانصراف</th><th>المدة</th><th>الحالة</th></tr></thead><tbody id="myRows"><tr><td colspan="5" class="empty">جاري التحميل...</td></tr></tbody></table></div></article>
+      </section>
+
+      <section id="page-employees" class="page hidden admin-only">
+        <div class="section-head"><div><h3>إدارة الموظفين</h3><p class="muted">بيانات فريق المكتبة الحديثة</p></div></div>
+        <article class="panel form-panel"><h3>إضافة بيانات موظف</h3><p class="tiny muted">أنشئ حساب الدخول أولاً من Supabase Authentication، ثم أضف نفس البريد هنا.</p>
+          <form id="employeeForm" class="inline-form"><div><label>الاسم</label><input id="empName" required placeholder="اسم الموظف"></div><div><label>البريد الإلكتروني</label><input id="empEmail" type="email" required placeholder="employee@email.com"></div><div><label>موعد بداية الدوام</label><input id="empStart" type="time" value="09:00" required></div><div><label>موعد نهاية الدوام</label><input id="empEnd" type="time" value="17:00" required></div><button class="btn primary" type="submit">حفظ الموظف</button></form>
+        </article>
+        <article class="panel"><div class="table-scroll"><table><thead><tr><th>الاسم</th><th>البريد</th><th>بداية الدوام</th><th>نهاية الدوام</th><th>الدور</th></tr></thead><tbody id="employeeRows"></tbody></table></div></article>
+      </section>
+
+      <section id="page-reports" class="page hidden admin-only">
+        <div class="section-head"><div><h3>تقارير الحضور</h3><p class="muted">راجع السجلات وحدد الفترة المطلوبة</p></div><button id="exportBtn" class="btn primary">تصدير CSV</button></div>
+        <article class="panel"><div class="filters"><div><label>من تاريخ</label><input type="date" id="fromDate"></div><div><label>إلى تاريخ</label><input type="date" id="toDate"></div><button id="filterBtn" class="btn secondary">تطبيق</button></div>
+          <div class="table-scroll"><table><thead><tr><th>التاريخ</th><th>الموظف</th><th>الحضور</th><th>الانصراف</th><th>ساعات العمل</th><th>الحالة</th></tr></thead><tbody id="reportRows"></tbody></table></div></article>
+      </section>
+
+      <section id="page-settings" class="page hidden admin-only">
+        <div class="settings-grid">
+          <article class="panel"><h3>إعدادات موقع العمل</h3><p class="muted">استخدم إحداثيات مقر المكتبة وحدد نطاق السماح.</p>
+            <form id="settingsForm"><label>خط العرض Latitude</label><input id="latitude" type="number" step="any" placeholder="31.4" required><label>خط الطول Longitude</label><input id="longitude" type="number" step="any" placeholder="31.8" required><label>نطاق الموقع بالمتر</label><input id="radius" type="number" min="20" max="1000" value="150" required><label>دقائق السماح للتأخير</label><input id="grace" type="number" min="0" max="120" value="10" required><button class="btn primary full">حفظ الإعدادات</button></form>
+          </article>
+          <article class="panel"><h3>رمز QR للحضور</h3><p class="muted">أنشئ رمزاً مؤقتاً صالحاً لمدة دقيقتين، ويستخدمه الموظف مع GPS.</p><button id="generateQr" class="btn primary full">إنشاء QR جديد</button><div id="adminQr" class="admin-qr"></div><p id="qrExpiry" class="tiny muted"></p></article>
+        </div>
+        <div class="notice warning">تنبيه: GPS عبر المتصفح وسيلة تحقق مساعدة وليست ضماناً ضد تزوير الموقع. للحصول على حماية أقوى استخدم جهازاً ثابتاً داخل المكتبة أو بوابة تحقق مخصصة.</div>
+      </section>
+      <footer>HODOR <span>•</span> المكتبة الحديثة © 2026</footer>
+    </section>
+  </div>
+  <script src="app.js"></script>
+</body></html>
