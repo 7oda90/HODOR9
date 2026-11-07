@@ -18,7 +18,8 @@
     <section class="login-card">
       <div class="brand-mark">H</div><div class="eyebrow">المكتبة الحديثة</div>
       <h1>HODOR</h1><p class="muted">نظام الحضور والانصراف الذكي</p>
-      <form id="loginForm">
+      <div id="entryGate" class="entry-gate"><h3>تأكيد التواجد داخل المكتبة</h3><p class="muted">امسح رمز QR الموجود داخل المكتبة أولاً، ثم أدخل بيانات حسابك.</p><div id="entryQrReader" class="qr-reader"></div><button id="entryScanBtn" class="btn primary full" type="button">فتح الكاميرا ومسح QR للدخول</button><button id="adminEntryBtn" class="btn secondary full" type="button">دخول المدير</button><p class="tiny muted">يلزم السماح باستخدام الكاميرا والموقع الجغرافي.</p></div>
+      <form id="loginForm" class="hidden">
         <label>البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" required placeholder="name@example.com">
         <label>كلمة المرور</label><input id="password" type="password" autocomplete="current-password" required placeholder="••••••••">
         <button class="btn primary full" type="submit">تسجيل الدخول</button>
@@ -107,5 +108,5 @@
       <footer>HODOR <span>•</span> المكتبة الحديثة © 2026</footer>
     </section>
   </div>
-  <script src="app.js?v=20261107-map1"></script>
+  <script src="app.js?v=20261107-entryqr1"></script>
 </body></html>
