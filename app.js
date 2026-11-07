@@ -34,6 +34,10 @@ async function login(e){
    console.error("HODOR login error:",error);
  }finally{btn.disabled=false;btn.textContent="تسجيل الدخول"}
 }
+// Bind login immediately so unrelated dashboard initialization cannot disable the login form.
+const loginForm=$("loginForm");
+if(loginForm){loginForm.addEventListener("submit",login);}
+window.addEventListener("error",e=>{const box=$("loginError");if(box&&!box.textContent)box.textContent="حصل خطأ في تشغيل الموقع. حدّث الصفحة، ولو استمر الخطأ أرسل صورة.";console.error("HODOR runtime error:",e.message)});
 async function boot(){const {data,error}=await db.from("profiles").select("*").eq("id",currentUser.id).single();if(error||!data){fail("الحساب غير مربوط بملف موظف. تواصل مع المدير.");await db.auth.signOut();return}
  profile=data;if(!profile.active){fail("هذا الحساب موقوف. تواصل مع مدير النظام.");await db.auth.signOut();currentUser=null;showLogin();return}showApp();$("userName").textContent=profile.full_name;$("welcomeName").textContent="أهلاً، "+profile.full_name;$("avatar").textContent=profile.full_name?.[0]||"م";$("userRole").textContent=profile.role==="admin"?"مدير النظام":"موظف";
  document.querySelectorAll(".admin-only").forEach(x=>x.classList.toggle("hidden",profile.role!=="admin"));
@@ -70,7 +74,7 @@ const savedTheme=(()=>{try{return localStorage.getItem("hodor-theme")||"blue"}ca
 applyTheme(savedTheme);
 $("themeSelect")?.addEventListener("change",e=>applyTheme(e.target.value));
 function clock(){const d=new Date();$("liveClock").textContent=d.toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true});$("liveDate").textContent=d.toLocaleDateString("ar-EG",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}
-const loginForm=$("loginForm"); if(loginForm){loginForm.addEventListener("submit",login);const loginButton=loginForm.querySelector('button[type="submit"]');loginButton?.addEventListener("click",e=>{e.preventDefault();if(loginForm.reportValidity())loginForm.requestSubmit()});} $("logoutBtn")?.addEventListener("click",async()=>{if(db)await db.auth.signOut();location.reload()});
+$("logoutBtn")?.addEventListener("click",async()=>{if(db)await db.auth.signOut();location.reload()});
 document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.page)));document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.goto)));
 $("checkInBtn").addEventListener("click",()=>doAttendance("in"));$("checkOutBtn").addEventListener("click",()=>doAttendance("out"));$("saveLateNoteBtn").addEventListener("click",saveLateNote);
 document.querySelectorAll('input[name="method"]').forEach(r=>r.addEventListener("change",()=>{$("qrArea").classList.toggle("hidden",getMethod()!=="qr")}));
