@@ -35,7 +35,7 @@
       <nav>
         <button class="nav active" data-page="overview">▦ <span>الرئيسية</span></button>
         <button class="nav" data-page="attendance">◷ <span>تسجيل الحضور</span></button>
-        <button class="nav admin-only" data-page="employees">♙ <span>الموظفون</span></button>
+        <button class="nav admin-only" data-page="employees">♙ <span>الموظفون</span></button><button class="nav" data-page="leaves">▣ <span>الإجازات</span></button><button class="nav admin-only" data-page="payroll">ج <span>المرتبات</span></button><button class="nav" data-page="notifications">♧ <span>الإشعارات</span></button><button class="nav admin-only" data-page="audit">◷ <span>سجل العمليات</span></button>
         <button class="nav admin-only" data-page="reports">▤ <span>التقارير</span></button>
         <button class="nav admin-only" data-page="settings">⚙ <span>الإعدادات و QR</span></button>
       </nav>
@@ -85,9 +85,9 @@
       <section id="page-employees" class="page hidden admin-only">
         <div class="section-head"><div><h3>إدارة الموظفين</h3><p class="muted">بيانات فريق المكتبة الحديثة</p></div></div>
         <article class="panel form-panel"><h3>إضافة بيانات موظف</h3><p class="tiny muted">أنشئ حساب الدخول أولاً من Supabase Authentication، ثم أضف نفس البريد هنا.</p>
-          <form id="employeeForm" class="inline-form"><div><label>الاسم</label><input id="empName" required placeholder="اسم الموظف"></div><div><label>البريد الإلكتروني</label><input id="empEmail" type="email" required placeholder="employee@email.com"></div><div><label>موعد بداية الدوام</label><input id="empStart" type="time" value="09:00" required></div><div><label>موعد نهاية الدوام</label><input id="empEnd" type="time" value="17:00" required></div><button class="btn primary" type="submit">حفظ الموظف</button></form>
+          <form id="employeeForm" class="inline-form"><div><label>الاسم</label><input id="empName" required placeholder="اسم الموظف"></div><div><label>البريد الإلكتروني</label><input id="empEmail" type="email" required placeholder="employee@email.com"></div><div><label>موعد بداية الدوام</label><input id="empStart" type="time" value="09:00" required></div><div><label>موعد نهاية الدوام</label><input id="empEnd" type="time" value="17:00" required></div><div><label>المرتب الشهري (جنيه)</label><input id="empSalary" type="number" min="0" step="0.01" value="0"></div><button class="btn primary" type="submit">حفظ الموظف</button></form>
         </article>
-        <article class="panel"><div class="table-scroll"><table><thead><tr><th>الاسم</th><th>البريد</th><th>بداية الدوام</th><th>نهاية الدوام</th><th>الدور</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="employeeRows"></tbody></table></div></article>
+        <article class="panel"><div class="table-scroll"><table><thead><tr><th>الاسم</th><th>البريد</th><th>بداية الدوام</th><th>نهاية الدوام</th><th>المرتب</th><th>الدور</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="employeeRows"></tbody></table></div></article>
       </section>
 
       <section id="page-reports" class="page hidden admin-only">
@@ -105,8 +105,12 @@
         </div>
         <div class="notice warning">تنبيه: GPS عبر المتصفح وسيلة تحقق مساعدة وليست ضماناً ضد تزوير الموقع. للحصول على حماية أقوى استخدم جهازاً ثابتاً داخل المكتبة أو بوابة تحقق مخصصة.</div>
       </section>
+<section id="page-leaves" class="page hidden"><article class="panel"><h3>طلب إجازة</h3><p class="muted">أرسل طلبك للمدير لمراجعته.</p><form id="leaveForm" class="inline-form"><div><label>من تاريخ</label><input id="leaveStart" type="date" required></div><div><label>إلى تاريخ</label><input id="leaveEnd" type="date" required></div><div><label>سبب الإجازة</label><input id="leaveReason" maxlength="500" required placeholder="اكتب السبب"></div><button class="btn primary" type="submit">إرسال الطلب</button></form></article><article class="panel"><h3>طلبات الإجازات</h3><div class="table-scroll"><table><thead><tr><th>الموظف</th><th>من</th><th>إلى</th><th>السبب</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="leaveRows"></tbody></table></div></article></section>
+<section id="page-payroll" class="page hidden admin-only"><article class="panel"><h3>تسوية المرتبات الشهرية</h3><p class="muted">المرتب الأساسي ثابت؛ المكافآت والخصومات تضاف يدويًا. لا تخصم أيام الغياب تلقائيًا.</p><form id="payrollForm" class="inline-form"><div><label>الموظف</label><select id="payEmployee" required></select></div><div><label>الشهر</label><input id="payMonth" type="month" required></div><div><label>نوع التسوية</label><select id="payKind"><option value="bonus">مكافأة / إضافة</option><option value="deduction">خصم</option></select></div><div><label>المبلغ بالجنيه</label><input id="payAmount" type="number" min="0.01" step="0.01" required></div><div><label>البيان</label><input id="payNote" required maxlength="200"></div><button class="btn primary" type="submit">إضافة التسوية</button></form></article><article class="panel"><div class="section-head"><h3>كشف المرتبات</h3><button id="payrollRefresh" class="btn secondary" type="button">تحديث الكشف</button></div><div class="table-scroll"><table><thead><tr><th>الموظف</th><th>الأساسي</th><th>أيام الحضور</th><th>مرات التأخير</th><th>الإضافات</th><th>الخصومات</th><th>الصافي</th></tr></thead><tbody id="payrollRows"></tbody></table></div></article></section>
+<section id="page-notifications" class="page hidden"><article class="panel"><div class="section-head"><h3>الإشعارات</h3><button id="notificationsRefresh" class="btn secondary">تحديث</button></div><div id="notificationRows" class="notification-list"><p class="empty">لا توجد إشعارات</p></div></article></section>
+<section id="page-audit" class="page hidden admin-only"><article class="panel"><h3>سجل العمليات الإدارية</h3><div class="table-scroll"><table><thead><tr><th>التاريخ</th><th>المستخدم</th><th>العملية</th><th>القسم</th><th>التفاصيل</th></tr></thead><tbody id="auditRows"></tbody></table></div></article></section>
       <footer>HODOR <span>•</span> المكتبة الحديثة © 2026</footer>
     </section>
   </div>
-  <script src="app.js?v=20261107-entryqr1"></script>
+  <script src="app.js?v=20261107-suite1"></script>
 </body></html>
