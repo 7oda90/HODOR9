@@ -57,13 +57,14 @@
           <article class="stat"><span>إجمالي الموظفين</span><strong id="statEmployees">—</strong><small>حسابات نشطة</small></article>
         </div>
         <div class="section-head"><div><h3>حالة اليوم</h3><p class="muted">آخر سجلات الحضور والانصراف</p></div><button class="btn secondary" data-goto="reports">عرض التقارير</button></div>
-        <div class="table-card"><div class="table-scroll"><table><thead><tr><th>الموظف</th><th>الحضور</th><th>الانصراف</th><th>ساعات العمل</th><th>الحالة</th></tr></thead><tbody id="todayRows"><tr><td colspan="5" class="empty">لا توجد بيانات بعد</td></tr></tbody></table></div></div>
+        <div class="table-card"><div class="table-scroll"><table><thead><tr><th>الموظف</th><th>الحضور</th><th>الانصراف</th><th>ساعات العمل</th><th>الحالة</th><th>ملاحظة الموظف</th></tr></thead><tbody id="todayRows"><tr><td colspan="5" class="empty">لا توجد بيانات بعد</td></tr></tbody></table></div></div>
       </section>
 
       <section id="page-attendance" class="page hidden">
         <div class="attendance-grid">
           <article class="panel clock-panel"><div class="eyebrow">تسجيل اليوم</div><div id="liveClock" class="clock">--:--:--</div><div id="liveDate" class="muted"></div>
             <div class="status-pill" id="myStatus">لم تسجل حضورك اليوم</div>
+            <div id="lateNoteBox" class="late-note-box hidden"><label for="lateNoteInput">سبب التأخير / ملاحظة للمدير</label><textarea id="lateNoteInput" maxlength="500" rows="3" placeholder="اكتب سبب التأخير هنا..."></textarea><button id="saveLateNoteBtn" class="btn secondary full" type="button">إرسال الملاحظة</button><p class="tiny muted">يمكنك تعديل الملاحظة وإرسالها مرة أخرى خلال اليوم.</p></div>
             <div class="action-buttons"><button id="checkInBtn" class="btn primary">تسجيل الحضور</button><button id="checkOutBtn" class="btn dark" disabled>تسجيل الانصراف</button></div>
             <p class="tiny muted">يتم حفظ وقت العملية تلقائياً على قاعدة البيانات.</p>
           </article>
@@ -89,7 +90,7 @@
       <section id="page-reports" class="page hidden admin-only">
         <div class="section-head"><div><h3>تقارير الحضور</h3><p class="muted">راجع السجلات وحدد الفترة المطلوبة</p></div><button id="exportBtn" class="btn primary">تصدير CSV</button></div>
         <article class="panel"><div class="filters"><div><label>من تاريخ</label><input type="date" id="fromDate"></div><div><label>إلى تاريخ</label><input type="date" id="toDate"></div><button id="filterBtn" class="btn secondary">تطبيق</button></div>
-          <div class="table-scroll"><table><thead><tr><th>التاريخ</th><th>الموظف</th><th>الحضور</th><th>الانصراف</th><th>ساعات العمل</th><th>الحالة</th></tr></thead><tbody id="reportRows"></tbody></table></div></article>
+          <div class="table-scroll"><table><thead><tr><th>التاريخ</th><th>الموظف</th><th>الحضور</th><th>الانصراف</th><th>ساعات العمل</th><th>الحالة</th><th>ملاحظة</th></tr></thead><tbody id="reportRows"></tbody></table></div></article>
       </section>
 
       <section id="page-settings" class="page hidden admin-only">
