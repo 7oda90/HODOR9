@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "HODOR - المكتبة الحديثة",
+  "short_name": "HODOR",
+  "description": "نظام إدارة الحضور والانصراف والموظفين للمكتبة الحديثة",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#101827",
+  "theme_color": "#101827",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {"src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}
