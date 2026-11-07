@@ -85,3 +85,15 @@ Run `management_suite.sql` once in Supabase SQL Editor after the existing setup 
 - Administrative audit entries for leave and payroll actions.
 
 The website adds mobile-friendly Leave, Payroll, Notifications and Audit pages. The payroll summary uses the entered monthly base salary plus manual bonuses minus manual deductions. Attendance days and late arrivals are shown as information only; no absence or lateness deductions are automatic. Set each employee's monthly salary in the employee form after running the migration.
+
+
+## تثبيت HODOR كتطبيق على الهاتف (PWA)
+
+المشروع يدعم التثبيت على الشاشة الرئيسية للآيفون والأندرويد دون إعادة بناء قاعدة البيانات:
+- Android: افتح رابط الموقع في Chrome، ثم اختر "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية".
+- iPhone: افتح رابط الموقع في Safari، اضغط زر المشاركة، ثم "إضافة إلى الشاشة الرئيسية".
+- التطبيق يفتح بواجهة مستقلة، ويستخدم نفس تسجيل الدخول وSupabase.
+- ملف Service Worker يخزن ملفات الواجهة فقط؛ لا يخزن بيانات تسجيل الدخول أو بيانات Supabase الحساسة.
+- يلزم اتصال إنترنت لاستخدام تسجيل الدخول والحضور وطلبات قاعدة البيانات. الكاميرا وGPS يحتاجان HTTPS.
+
+هذا إصدار PWA قابل للتثبيت، وليس تطبيقاً منشوراً في App Store أو Google Play.
