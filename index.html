@@ -3,6 +3,14 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#101827">
+  <meta name="description" content="تطبيق HODOR لإدارة الحضور والانصراف والموظفين في المكتبة الحديثة">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HODOR">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
   <title>HODOR | الحضور والانصراف</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -44,7 +52,7 @@
 
     <section class="main">
       <header class="topbar"><div><div class="eyebrow">لوحة التحكم</div><h2 id="pageTitle">نظرة عامة</h2></div>
-        <button id="refreshPageBtn" class="btn secondary" type="button" onclick="window.location.reload()" title="إعادة تحميل الموقع">↻ تحديث الموقع</button>
+        <div class="app-actions"><button id="installAppBtn" class="btn primary install-app-btn" type="button">＋ تثبيت التطبيق</button><button id="refreshPageBtn" class="btn secondary" type="button" onclick="window.location.reload()" title="إعادة تحميل الموقع">↻ تحديث</button></div>
         <label class="theme-control" for="themeSelect">🎨 <span>الثيم</span><select id="themeSelect" aria-label="اختيار ثيم الموقع">
 <option value="blue">أزرق كلاسيكي</option><option value="emerald">أخضر زمردي</option><option value="purple">بنفسجي</option><option value="midnight">منتصف الليل</option><option value="rose">وردي</option><option value="orange">برتقالي</option><option value="teal">فيروزي</option><option value="red">أحمر</option><option value="cyan">سماوي</option><option value="indigo">نيلي</option><option value="gold">ذهبي</option><option value="graphite">جرافيت</option><option value="mint">نعناعي</option><option value="coral">مرجاني</option><option value="ocean">محيطي</option><option value="lavender">لافندر</option><option value="forest">غابة</option><option value="ruby">ياقوتي</option><option value="sand">رملي</option><option value="neon">نيون</option>
 </select></label>
@@ -112,5 +120,5 @@
       <footer>HODOR <span>•</span> المكتبة الحديثة © 2026</footer>
     </section>
   </div>
-  <script src="app.js?v=20261107-suite1"></script>
+  <script src="app.js?v=20261107-pwa1"></script>
 </body></html>
