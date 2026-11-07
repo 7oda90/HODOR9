@@ -4,7 +4,7 @@ const SUPABASE_URL = "https://qhxzdcazlwpuemdxibmt.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_fPjlAK21Q-icH7d6L3mfqg_aaOhk0aC";
 const sbReady = !SUPABASE_URL.includes("YOUR-PROJECT") && !SUPABASE_ANON_KEY.includes("YOUR-SUPABASE");
 const db = sbReady && window.supabase?.createClient ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-let currentUser=null, profile=null, settings=null, attendanceCache=[], employeesCache=[], qrScanner=null, currentQrToken=null, workMap=null, workMarker=null;
+let currentUser=null, profile=null, settings=null, attendanceCache=[], employeesCache=[], qrScanner=null, currentQrToken=null, workMap=null, workMarker=null, entryQrToken=null, entryScanner=null, adminLoginBypass=false;
 const $ = id => document.getElementById(id);
 const fmtTime = v => v ? new Date(v).toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit",hour12:true}) : "—";
 const fmtDate = v => new Date(v).toLocaleDateString("ar-EG",{year:"numeric",month:"short",day:"numeric"});
@@ -15,8 +15,10 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 function statusLabel(s){return ({present:"حاضر",late:"متأخر",completed:"انصرف",absent:"غائب"})[s]||s||"—"}
 function duration(a,b){if(!a||!b)return "—";let n=Math.max(0,(new Date(b)-new Date(a))/3600000);return n.toFixed(2)+" ساعة"}
 function localISODate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
-function showLogin(){ $("loginView").classList.remove("hidden");$("appView").classList.add("hidden")}
+function showLogin(){ $("loginView").classList.remove("hidden");$("appView").classList.add("hidden");if(entryQrToken){$("entryGate").classList.add("hidden");$("loginForm").classList.remove("hidden")}else if(adminLoginBypass){$("entryGate").classList.add("hidden");$("loginForm").classList.remove("hidden")}else{$("entryGate").classList.remove("hidden");$("loginForm").classList.add("hidden")}}
 function showApp(){ $("loginView").classList.add("hidden");$("appView").classList.remove("hidden")}
+async function startEntryScan(){if(!window.Html5Qrcode)await loadScannerLib();if(!window.Html5Qrcode){fail("تعذر تحميل قارئ QR");return}if(entryScanner){await entryScanner.stop().catch(()=>{});entryScanner=null}entryScanner=new Html5Qrcode("entryQrReader");try{await entryScanner.start({facingMode:"environment"},{fps:10,qrbox:{width:220,height:220}},async raw=>{try{const parsed=JSON.parse(raw);if(!parsed.token)throw Error();entryQrToken=parsed.token;await entryScanner.stop();entryScanner=null;$("entryGate").classList.add("hidden");$("loginForm").classList.remove("hidden");toast("تم مسح QR. أدخل بيانات حسابك لإكمال التحقق.")}catch(e){fail("رمز QR غير صالح")}},()=>{})}catch(e){fail("تعذر فتح الكاميرا. اسمح باستخدامها من إعدادات المتصفح.")}}
+async function verifyEntryAccess(){if(profile.role==="admin")return true;if(!entryQrToken)throw Error("لازم تمسح QR الموجود داخل المكتبة قبل الدخول");const p=await getPosition();const {data,error}=await db.rpc("verify_entry_qr",{p_qr_token:entryQrToken,p_lat:p.latitude,p_lng:p.longitude});if(error)throw error;if(data!==true)throw Error("تعذر التحقق من QR أو أنك خارج نطاق المكتبة");entryQrToken=null;return true}
 async function login(e){
  e.preventDefault();
  const errBox=$("loginError"), btn=$("loginForm").querySelector('button[type="submit"]');
@@ -39,7 +41,7 @@ const loginForm=$("loginForm");
 if(loginForm){loginForm.addEventListener("submit",login);}
 window.addEventListener("error",e=>{const box=$("loginError");if(box&&!box.textContent)box.textContent="حصل خطأ في تشغيل الموقع. حدّث الصفحة، ولو استمر الخطأ أرسل صورة.";console.error("HODOR runtime error:",e.message)});
 async function boot(){const {data,error}=await db.from("profiles").select("*").eq("id",currentUser.id).single();if(error||!data){fail("الحساب غير مربوط بملف موظف. تواصل مع المدير.");await db.auth.signOut();return}
- profile=data;if(!profile.active){fail("هذا الحساب موقوف. تواصل مع مدير النظام.");await db.auth.signOut();currentUser=null;showLogin();return}showApp();$("userName").textContent=profile.full_name;$("welcomeName").textContent="أهلاً، "+profile.full_name;$("avatar").textContent=profile.full_name?.[0]||"م";$("userRole").textContent=profile.role==="admin"?"مدير النظام":"موظف";
+ profile=data;if(!profile.active){fail("هذا الحساب موقوف. تواصل مع مدير النظام.");await db.auth.signOut();currentUser=null;showLogin();return}try{await verifyEntryAccess()}catch(gateError){fail(gateError.message||"يجب مسح QR والتواجد داخل المكتبة");await db.auth.signOut();currentUser=null;profile=null;entryQrToken=null;showLogin();return}showApp();$("userName").textContent=profile.full_name;$("welcomeName").textContent="أهلاً، "+profile.full_name;$("avatar").textContent=profile.full_name?.[0]||"م";$("userRole").textContent=profile.role==="admin"?"مدير النظام":"موظف";
  document.querySelectorAll(".admin-only").forEach(x=>x.classList.toggle("hidden",profile.role!=="admin"));
  $("todayDate").textContent=new Date().toLocaleDateString("ar-EG",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
  await loadSettings();await refreshAll();navigate("overview");subscribeLive()}
@@ -81,11 +83,11 @@ $("logoutBtn")?.addEventListener("click",async()=>{if(db)await db.auth.signOut()
 document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.page)));document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.goto)));
 $("checkInBtn").addEventListener("click",()=>doAttendance("in"));$("checkOutBtn").addEventListener("click",()=>doAttendance("out"));$("saveLateNoteBtn").addEventListener("click",saveLateNote);
 document.querySelectorAll('input[name="method"]').forEach(r=>r.addEventListener("change",()=>{$("qrArea").classList.toggle("hidden",getMethod()!=="qr")}));
-$("scanBtn").addEventListener("click",startScan);$("generateQr").addEventListener("click",generateQR);$("settingsForm").addEventListener("submit",saveSettings);$("useMyLocation").addEventListener("click",useMyLocationForMap);$("employeeForm").addEventListener("submit",addEmployee);$("employeeRows").addEventListener("click",e=>{const b=e.target.closest(".employee-toggle");if(b)toggleEmployee(b.dataset.id,b.dataset.active==="true")});$("filterBtn").addEventListener("click",loadReports);$("exportBtn").addEventListener("click",exportCSV);
+$("scanBtn").addEventListener("click",startScan);$("generateQr").addEventListener("click",generateQR);$("entryScanBtn").addEventListener("click",startEntryScan);$("adminEntryBtn").addEventListener("click",()=>{adminLoginBypass=true;$("entryGate").classList.add("hidden");$("loginForm").classList.remove("hidden")});$("settingsForm").addEventListener("submit",saveSettings);$("useMyLocation").addEventListener("click",useMyLocationForMap);$("employeeForm").addEventListener("submit",addEmployee);$("employeeRows").addEventListener("click",e=>{const b=e.target.closest(".employee-toggle");if(b)toggleEmployee(b.dataset.id,b.dataset.active==="true")});$("filterBtn").addEventListener("click",loadReports);$("exportBtn").addEventListener("click",exportCSV);
 setInterval(clock,1000);clock();
 if(db){
  db.auth.getSession().then(({data,error})=>{
    if(error){$("loginError").textContent="تعذر الاتصال بخدمة تسجيل الدخول: "+error.message;return}
-   if(data.session){currentUser=data.session.user;boot().catch(e=>{$("loginError").textContent=e.message||"تعذر تحميل حسابك";console.error(e)})}
+   if(data.session){currentUser=data.session.user;db.auth.signOut().then(()=>{currentUser=null;showLogin()})}
  }).catch(e=>{$("loginError").textContent="تعذر الاتصال: "+(e.message||e);console.error(e)});
 }else{$("loginError").textContent="مكتبة Supabase لم تُحمّل. تأكد من اتصال الإنترنت ثم حدّث الصفحة."}
