@@ -41,3 +41,5 @@ body .clock{color:var(--th-welcome1)}
 .entry-gate{display:grid;gap:12px;margin:14px 0}.entry-gate h3{margin:0}.entry-gate .qr-reader{min-height:40px;max-width:100%;overflow:hidden;border-radius:12px}.entry-gate .btn{width:100%}#loginForm.hidden{display:none}
 
 .notification-list{display:grid;gap:10px}.notification-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border:1px solid #e8edf4;border-radius:12px;background:#fbfcfe}.notification-item p{margin:4px 0;font-size:13px}.notification-item small{color:#8490a3}.notification-item.read{opacity:.65}.inline-form select{width:100%;padding:12px;border:1px solid #e1e7f0;border-radius:10px;background:#fbfcfe;font:inherit}.inline-form input{width:100%}@media(max-width:680px){.notification-item{align-items:flex-start;flex-direction:column}.sidebar nav{padding-bottom:5px}.nav{font-size:11px}}
+
+.app-actions{display:flex;gap:8px;align-items:center}.install-app-btn{white-space:nowrap}@media(max-width:680px){.topbar{gap:8px;flex-wrap:wrap}.app-actions{order:3;width:100%}.app-actions button{flex:1}.install-app-btn{display:inline-flex}}
