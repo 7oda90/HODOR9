@@ -4,11 +4,32 @@ const SUPABASE_URL = "https://qhxzdcazlwpuemdxibmt.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_fPjlAK21Q-icH7d6L3mfqg_aaOhk0aC";
 const sbReady = !SUPABASE_URL.includes("YOUR-PROJECT") && !SUPABASE_ANON_KEY.includes("YOUR-SUPABASE");
 const db = sbReady && window.supabase?.createClient ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-let currentUser=null, profile=null, settings=null, attendanceCache=[], employeesCache=[], qrScanner=null, currentQrToken=null, workMap=null, workMarker=null, entryQrToken=null, entryScanner=null, adminLoginBypass=false;
+let currentUser=null, profile=null, settings=null, attendanceCache=[], employeesCache=[], qrScanner=null, currentQrToken=null, workMap=null, workMarker=null, entryQrToken=null, entryScanner=null, adminLoginBypass=false, deferredInstallPrompt=null;
 const $ = id => document.getElementById(id);
 const fmtTime = v => v ? new Date(v).toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit",hour12:true}) : "—";
 const fmtDate = v => new Date(v).toLocaleDateString("ar-EG",{year:"numeric",month:"short",day:"numeric"});
 const today = () => new Date().toISOString().slice(0,10);
+
+function setupPWA(){
+ if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(err=>console.warn("PWA worker:",err)));
+ }
+ const installBtn=$("installAppBtn");
+ if(!installBtn)return;
+ window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();deferredInstallPrompt=event;installBtn.classList.remove("hidden")});
+ window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;installBtn.classList.add("hidden");toast("تم تثبيت HODOR على جهازك")});
+ installBtn.addEventListener("click",async()=>{
+  if(deferredInstallPrompt){
+   deferredInstallPrompt.prompt();
+   const result=await deferredInstallPrompt.userChoice;
+   if(result?.outcome==="accepted")toast("جاري تثبيت HODOR");
+   deferredInstallPrompt=null;
+  }else{
+   alert("لتثبيت HODOR على iPhone: افتح الموقع من Safari، اضغط زر المشاركة، ثم اختر إضافة إلى الشاشة الرئيسية، وبعدها اضغط إضافة.\n\nعلى Android: افتح قائمة المتصفح واختر تثبيت التطبيق أو إضافة إلى الشاشة الرئيسية.");
+  }
+ });
+}
+
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),3200)}
 function fail(msg){toast(msg)}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -92,7 +113,7 @@ document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>navi
 $("checkInBtn").addEventListener("click",()=>doAttendance("in"));$("checkOutBtn").addEventListener("click",()=>doAttendance("out"));$("saveLateNoteBtn").addEventListener("click",saveLateNote);
 document.querySelectorAll('input[name="method"]').forEach(r=>r.addEventListener("change",()=>{$("qrArea").classList.toggle("hidden",getMethod()!=="qr")}));
 $("scanBtn").addEventListener("click",startScan);$("generateQr").addEventListener("click",generateQR);$("entryScanBtn").addEventListener("click",startEntryScan);$("adminEntryBtn").addEventListener("click",()=>{adminLoginBypass=true;$("entryGate").classList.add("hidden");$("loginForm").classList.remove("hidden")});$("settingsForm").addEventListener("submit",saveSettings);$("useMyLocation").addEventListener("click",useMyLocationForMap);$("employeeForm").addEventListener("submit",addEmployee);$("employeeRows").addEventListener("click",e=>{const b=e.target.closest(".employee-toggle");if(b)toggleEmployee(b.dataset.id,b.dataset.active==="true")});$("filterBtn").addEventListener("click",loadReports);$("exportBtn").addEventListener("click",exportCSV);$("leaveForm").addEventListener("submit",submitLeave);$("leaveRows").addEventListener("click",e=>{const b=e.target.closest(".leave-review");if(b)reviewLeave(b.dataset.id,b.dataset.decision)});$("payrollForm").addEventListener("submit",addPayrollAdjustment);$("payrollRefresh").addEventListener("click",loadPayroll);$("notificationsRefresh").addEventListener("click",loadNotifications);$("notificationRows").addEventListener("click",async e=>{const b=e.target.closest(".notification-read");if(!b)return;const r=await db.rpc("mark_notification_read",{p_id:b.dataset.id});if(r.error)fail(r.error.message);else loadNotifications()});$("payMonth").value=localISODate().slice(0,7);
-setInterval(clock,1000);clock();
+setupPWA();setInterval(clock,1000);clock();
 if(db){
  db.auth.getSession().then(({data,error})=>{
    if(error){$("loginError").textContent="تعذر الاتصال بخدمة تسجيل الدخول: "+error.message;return}
