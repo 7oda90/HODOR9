@@ -33,3 +33,5 @@ body .clock{color:var(--th-welcome1)}
 .theme-control{display:flex;align-items:center;gap:7px;padding:7px 10px;background:white;border:1px solid #e7edf5;border-radius:11px;color:#65748a;font-size:12px;font-weight:800;white-space:nowrap}
 .theme-control select{border:0;background:transparent;color:#25364c;font:inherit;outline:none;max-width:145px;cursor:pointer}
 @media(max-width:680px){.topbar{flex-wrap:wrap}.theme-control{order:3}.theme-control select{max-width:125px}}
+
+.late-note-box{width:100%;margin-top:12px;padding:14px;background:#fff8e9;border:1px solid #f2dfb5;border-radius:12px;text-align:right}.late-note-box label{display:block;font-size:13px;font-weight:800;margin-bottom:7px}.late-note-box textarea{width:100%;resize:vertical;min-height:82px;padding:11px 12px;border:1px solid #e5d8bc;border-radius:9px;background:#fff;outline:none;font:inherit;font-size:13px}.late-note-box textarea:focus{border-color:var(--th-primary);box-shadow:0 0 0 3px #3478e51a}.late-note-box .btn{margin-top:8px}.late-note-box .tiny{margin-bottom:0}
