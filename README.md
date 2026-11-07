@@ -73,3 +73,15 @@
 - عند تحديث الصفحة أو تسجيل الخروج، يجب مسح QR من جديد.
 
 ملاحظة: هذا يرفع مستوى التحقق لكنه لا يمنع تماماً مشاركة صورة QR أو تزوير GPS على جهاز معدل.
+
+
+## HODOR Management Suite
+
+Run `management_suite.sql` once in Supabase SQL Editor after the existing setup scripts. This migration adds:
+- Monthly salary per employee profile.
+- Leave requests with employee submission and admin approval/rejection.
+- Monthly payroll adjustments (bonuses and deductions).
+- Employee notifications for leave submission and decision.
+- Administrative audit entries for leave and payroll actions.
+
+The website adds mobile-friendly Leave, Payroll, Notifications and Audit pages. The payroll summary uses the entered monthly base salary plus manual bonuses minus manual deductions. Attendance days and late arrivals are shown as information only; no absence or lateness deductions are automatic. Set each employee's monthly salary in the employee form after running the migration.
