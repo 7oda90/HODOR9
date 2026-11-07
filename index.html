@@ -7,8 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
   <div id="toast" class="toast"></div>
@@ -96,7 +98,7 @@
       <section id="page-settings" class="page hidden admin-only">
         <div class="settings-grid">
           <article class="panel"><h3>إعدادات موقع العمل</h3><p class="muted">استخدم إحداثيات مقر المكتبة وحدد نطاق السماح.</p>
-            <form id="settingsForm"><label>خط العرض Latitude</label><input id="latitude" type="number" step="any" placeholder="31.4" required><label>خط الطول Longitude</label><input id="longitude" type="number" step="any" placeholder="31.8" required><label>نطاق الموقع بالمتر</label><input id="radius" type="number" min="20" max="1000" value="150" required><label>دقائق السماح للتأخير</label><input id="grace" type="number" min="0" max="120" value="10" required><button class="btn primary full">حفظ الإعدادات</button></form>
+            <form id="settingsForm"><label>خط العرض Latitude</label><input id="latitude" type="number" step="any" placeholder="31.4" required><label>خط الطول Longitude</label><input id="longitude" type="number" step="any" placeholder="31.8" required><div class="map-tools"><button id="useMyLocation" class="btn secondary" type="button">استخدم موقعي الحالي</button><span class="tiny muted">اضغط على الخريطة لتحديد مقر المكتبة أو اسحب العلامة للمكان الصحيح.</span></div><div id="workLocationMap" class="work-location-map" aria-label="خريطة تحديد موقع المكتبة"></div><p id="mapCoordinates" class="tiny muted">لم يتم تحديد نقطة جديدة على الخريطة.</p><label>نطاق الموقع بالمتر</label><input id="radius" type="number" min="20" max="1000" value="150" required><label>دقائق السماح للتأخير</label><input id="grace" type="number" min="0" max="120" value="10" required><button class="btn primary full">حفظ الإعدادات</button></form>
           </article>
           <article class="panel"><h3>رمز QR الثابت للحضور والانصراف</h3><p class="muted">أنشئ الرمز مرة واحدة واطبعه أو احتفظ بصورة منه داخل المكتبة. يظل صالحاً للحضور والانصراف، مع التحقق من GPS.</p><button id="generateQr" class="btn primary full">عرض / إنشاء QR ثابت</button><div id="adminQr" class="admin-qr"></div><p id="qrExpiry" class="tiny muted"></p></article>
         </div>
@@ -105,5 +107,5 @@
       <footer>HODOR <span>•</span> المكتبة الحديثة © 2026</footer>
     </section>
   </div>
-  <script src="app.js?v=20261107-permanentqr1"></script>
+  <script src="app.js?v=20261107-map1"></script>
 </body></html>
