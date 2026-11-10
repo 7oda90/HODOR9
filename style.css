@@ -62,3 +62,21 @@ th{background:rgba(238,244,252,.70)}td{background:rgba(255,255,255,.20)}tr:hover
 .work-location-map{border:1px solid rgba(255,255,255,.75);box-shadow:0 8px 25px rgba(31,55,90,.10)}
 @media(max-width:680px){.sidebar{background:rgba(15,28,48,.88)!important;border:0;border-radius:0 0 22px 22px;box-shadow:0 10px 30px rgba(15,28,48,.16)}.main{padding-top:18px}.stat,.panel,.table-card{border-radius:19px}.welcome{border-radius:22px}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.login-card,.user-chip,.stat,.panel,.table-card,.theme-control{background:rgba(255,255,255,.94)}}
+
+
+/* HODOR Liquid Glass v2 — stronger iPhone-style glass */
+:root{--lg-border:rgba(255,255,255,.62);--lg-blur:28px}
+body{background-color:var(--th-bg);background-image:radial-gradient(ellipse at 12% 12%,rgba(91,157,255,.24),transparent 38%),radial-gradient(ellipse at 88% 18%,rgba(174,135,255,.20),transparent 36%),radial-gradient(ellipse at 65% 88%,rgba(83,207,205,.18),transparent 40%),linear-gradient(145deg,rgba(255,255,255,.22),transparent 55%);background-attachment:fixed}
+.login-card,.user-chip,.stat,.panel,.table-card,.theme-control,.notification-item{background:linear-gradient(145deg,rgba(255,255,255,.66),rgba(255,255,255,.27))!important;border:1px solid var(--lg-border)!important;box-shadow:0 18px 48px rgba(28,49,82,.12),inset 0 1.5px 0 rgba(255,255,255,.86),inset 0 -1px 0 rgba(255,255,255,.20)!important;-webkit-backdrop-filter:blur(var(--lg-blur)) saturate(190%);backdrop-filter:blur(var(--lg-blur)) saturate(190%)}
+.stat,.panel,.table-card{position:relative;overflow:hidden}
+.stat:before,.panel:before,.table-card:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);pointer-events:none}
+.stat{transition:transform .24s ease,box-shadow .24s ease}.stat:hover{transform:translateY(-3px);box-shadow:0 22px 52px rgba(28,49,82,.16),inset 0 1px 0 rgba(255,255,255,.9)!important}
+.sidebar{background:linear-gradient(155deg,rgba(17,31,53,.88),rgba(20,39,66,.70))!important;border-left:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(32px) saturate(175%);backdrop-filter:blur(32px) saturate(175%)}
+.welcome{background:linear-gradient(120deg,rgba(23,48,81,.82),rgba(54,104,166,.58))!important;border:1px solid rgba(255,255,255,.35);box-shadow:0 22px 55px rgba(29,65,116,.20),inset 0 1px 0 rgba(255,255,255,.30)}
+.nav.active,.nav:hover{background:linear-gradient(120deg,rgba(255,255,255,.23),rgba(255,255,255,.10))!important;border:1px solid rgba(255,255,255,.26);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 5px 18px rgba(0,0,0,.08)}
+.btn{transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}.btn:active{transform:scale(.97)}.btn.primary{background:linear-gradient(135deg,rgba(52,120,229,.94),rgba(71,151,240,.78));border:1px solid rgba(255,255,255,.38);box-shadow:0 9px 22px rgba(52,120,229,.22),inset 0 1px 0 rgba(255,255,255,.38)}
+.login-card input,.panel input,.inline-form select,.late-note-box textarea{background:rgba(255,255,255,.43)!important;border:1px solid rgba(255,255,255,.72)!important;box-shadow:inset 0 2px 6px rgba(45,66,100,.035),0 5px 16px rgba(35,55,85,.035)}
+th{background:rgba(224,235,250,.48)!important}td{background:rgba(255,255,255,.14)}tr:hover td{background:rgba(255,255,255,.40)}
+.toast{background:rgba(16,29,49,.78)!important;border:1px solid rgba(255,255,255,.28);box-shadow:0 16px 40px rgba(10,20,38,.22),inset 0 1px 0 rgba(255,255,255,.16)}
+@media(max-width:680px){.login-card,.user-chip,.stat,.panel,.table-card,.notification-item{-webkit-backdrop-filter:blur(24px) saturate(185%);backdrop-filter:blur(24px) saturate(185%)}.stat,.panel{background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.34))!important}}
+@media(prefers-reduced-motion:reduce){.stat,.btn{transition:none}.stat:hover,.btn:active{transform:none}}
