@@ -43,3 +43,22 @@ body .clock{color:var(--th-welcome1)}
 .notification-list{display:grid;gap:10px}.notification-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border:1px solid #e8edf4;border-radius:12px;background:#fbfcfe}.notification-item p{margin:4px 0;font-size:13px}.notification-item small{color:#8490a3}.notification-item.read{opacity:.65}.inline-form select{width:100%;padding:12px;border:1px solid #e1e7f0;border-radius:10px;background:#fbfcfe;font:inherit}.inline-form input{width:100%}@media(max-width:680px){.notification-item{align-items:flex-start;flex-direction:column}.sidebar nav{padding-bottom:5px}.nav{font-size:11px}}
 
 .app-actions{display:flex;gap:8px;align-items:center}.install-app-btn{white-space:nowrap}@media(max-width:680px){.topbar{gap:8px;flex-wrap:wrap}.app-actions{order:3;width:100%}.app-actions button{flex:1}.install-app-btn{display:inline-flex}}
+
+/* HODOR Liquid Glass UI — iOS-inspired translucent surfaces */
+:root{--glass-line:rgba(255,255,255,.58);--glass-fill:rgba(255,255,255,.58);--glass-shadow:0 12px 36px rgba(31,55,90,.10),inset 0 1px 0 rgba(255,255,255,.72)}
+body{background:radial-gradient(ellipse at 8% 8%,rgba(105,160,255,.19),transparent 34%),radial-gradient(ellipse at 92% 22%,rgba(163,132,255,.15),transparent 32%),radial-gradient(ellipse at 70% 95%,rgba(91,199,208,.13),transparent 34%),var(--th-bg);background-attachment:fixed}
+.login-wrap{background:radial-gradient(circle at 18% 18%,rgba(101,157,255,.42),transparent 35%),radial-gradient(circle at 85% 78%,rgba(154,119,238,.28),transparent 35%),linear-gradient(135deg,#101b30,#1c3150 55%,#18243b)}
+.login-card,.user-chip,.stat,.panel,.table-card,.theme-control,.notification-item{background:var(--glass-fill);border:1px solid var(--glass-line);box-shadow:var(--glass-shadow);-webkit-backdrop-filter:blur(22px) saturate(175%);backdrop-filter:blur(22px) saturate(175%)}
+.login-card{border-radius:30px}.stat,.panel,.table-card{border-radius:22px}.user-chip,.theme-control{border-radius:18px}
+.sidebar{background:rgba(13,25,44,.76)!important;border-left:1px solid rgba(255,255,255,.13);box-shadow:-12px 0 38px rgba(20,38,68,.12);-webkit-backdrop-filter:blur(26px) saturate(160%);backdrop-filter:blur(26px) saturate(160%)}
+.nav{border:1px solid transparent;transition:background .22s,border-color .22s,transform .22s}.nav.active,.nav:hover{background:rgba(255,255,255,.17)!important;border-color:rgba(255,255,255,.20);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.welcome{border:1px solid rgba(255,255,255,.23);background:linear-gradient(115deg,rgba(24,49,82,.88),rgba(49,95,158,.72))!important;box-shadow:0 18px 42px rgba(30,65,115,.18),inset 0 1px 0 rgba(255,255,255,.22);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border-radius:26px}
+.btn{border:1px solid rgba(255,255,255,.20);box-shadow:0 5px 14px rgba(28,52,86,.08);border-radius:14px}.btn.primary{background:linear-gradient(135deg,var(--th-primary),var(--th-welcome2))}
+.login-card input,.panel input,.inline-form select,.late-note-box textarea{background:rgba(255,255,255,.66);border:1px solid rgba(150,170,200,.34);border-radius:14px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.login-card input:focus,.panel input:focus,.inline-form select:focus{background:rgba(255,255,255,.88);border-color:var(--th-primary);box-shadow:0 0 0 4px rgba(80,130,210,.13)}
+th{background:rgba(238,244,252,.70)}td{background:rgba(255,255,255,.20)}tr:hover td{background:rgba(255,255,255,.48)}
+.status-pill,.notice,.late-note-box{border:1px solid rgba(255,255,255,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.toast{background:rgba(20,34,56,.82);border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border-radius:17px}
+.work-location-map{border:1px solid rgba(255,255,255,.75);box-shadow:0 8px 25px rgba(31,55,90,.10)}
+@media(max-width:680px){.sidebar{background:rgba(15,28,48,.88)!important;border:0;border-radius:0 0 22px 22px;box-shadow:0 10px 30px rgba(15,28,48,.16)}.main{padding-top:18px}.stat,.panel,.table-card{border-radius:19px}.welcome{border-radius:22px}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.login-card,.user-chip,.stat,.panel,.table-card,.theme-control{background:rgba(255,255,255,.94)}}
