@@ -66,7 +66,49 @@ async function boot(){const {data,error}=await db.from("profiles").select("*").e
  document.querySelectorAll(".admin-only").forEach(x=>x.classList.toggle("hidden",profile.role!=="admin"));
  $("todayDate").textContent=new Date().toLocaleDateString("ar-EG",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
  await loadSettings();await refreshAll();navigate("overview");subscribeLive()}
-function subscribeLive(){db.channel("hodor-live").on("postgres_changes",{event:"*",schema:"public",table:"attendance"},()=>refreshAll()).subscribe()}
+let notificationChannel=null, notificationAudioEnabled=false, notificationAudioContext=null;
+function playAttendanceSound(){
+ if(!notificationAudioEnabled)return;
+ try{
+  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
+  notificationAudioContext=notificationAudioContext||new Ctx();
+  if(notificationAudioContext.state==="suspended")notificationAudioContext.resume();
+  const ctx=notificationAudioContext,now=ctx.currentTime;
+  [880,1175].forEach((hz,i)=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type="sine";osc.frequency.value=hz;gain.gain.setValueAtTime(.0001,now+i*.16);gain.gain.exponentialRampToValueAtTime(.16,now+i*.16+.025);gain.gain.exponentialRampToValueAtTime(.0001,now+i*.16+.22);osc.connect(gain);gain.connect(ctx.destination);osc.start(now+i*.16);osc.stop(now+i*.16+.24)});
+ }catch(e){console.warn("HODOR notification sound:",e)}
+}
+async function enableDeviceNotifications(){
+ try{
+  if(!("Notification" in window)){fail("المتصفح لا يدعم إشعارات النظام");return}
+  const permission=Notification.permission==="granted"?"granted":await Notification.requestPermission();
+  if(permission!=="granted"){fail("لم يتم السماح بالإشعارات. فعّلها من إعدادات المتصفح");return}
+  notificationAudioEnabled=true;
+  const Ctx=window.AudioContext||window.webkitAudioContext;
+  if(Ctx){notificationAudioContext=notificationAudioContext||new Ctx();await notificationAudioContext.resume();playAttendanceSound()}
+  $("enableNotificationsBtn").textContent="✓ تم تفعيل الإشعارات والصوت";$("enableNotificationsBtn").disabled=true;
+  toast("تم تفعيل إشعارات الجهاز والصوت");
+ }catch(e){fail("تعذر تفعيل الإشعارات: "+(e.message||e))}
+}
+function showDeviceNotification(row){
+ playAttendanceSound();
+ if(!("Notification" in window)||Notification.permission!=="granted")return;
+ const options={body:row.body,icon:"./icon.svg",tag:"hodor-"+row.id,renotify:false};
+ try{
+  if(navigator.serviceWorker?.controller)navigator.serviceWorker.ready.then(reg=>reg.showNotification(row.title,options)).catch(()=>new Notification(row.title,options));
+  else new Notification(row.title,options);
+ }catch(e){console.warn("HODOR system notification:",e)}
+}
+function subscribeNotificationLive(){
+ if(notificationChannel){db.removeChannel(notificationChannel);notificationChannel=null}
+ notificationChannel=db.channel("hodor-notifications-"+currentUser.id)
+  .on("postgres_changes",{event:"INSERT",schema:"public",table:"notifications",filter:"user_id=eq."+currentUser.id},payload=>{
+   const row=payload.new;if(!row)return;
+   showDeviceNotification(row);
+   if(!$("page-notifications").classList.contains("hidden"))loadNotifications();
+   else toast(row.title+" — "+row.body);
+  }).subscribe(status=>{if(status==="CHANNEL_ERROR")console.warn("HODOR notifications realtime channel error")});
+}
+function subscribeLive(){db.channel("hodor-live").on("postgres_changes",{event:"*",schema:"public",table:"attendance"},()=>refreshAll()).subscribe();subscribeNotificationLive()}
 async function loadSettings(){const {data}=await db.from("app_settings").select("*").eq("id",1).maybeSingle();settings=data||{latitude:null,longitude:null,radius_m:150,grace_minutes:10};if(settings.latitude!==null){$("latitude").value=settings.latitude;$("longitude").value=settings.longitude}$("radius").value=settings.radius_m||150;$("grace").value=settings.grace_minutes??10}
 async function refreshAll(){await loadMyAttendance();if(profile.role==="admin"){await loadEmployees();await loadToday();await loadReports()}}
 async function loadMyAttendance(){const {data,error}=await db.from("attendance").select("*").eq("employee_id",currentUser.id).order("work_date",{ascending:false}).limit(45);if(error){fail(error.message);return}attendanceCache=data||[];renderMy();const row=attendanceCache.find(x=>x.work_date===localISODate());$("checkInBtn").disabled=!!row?.check_in;$("checkOutBtn").disabled=!row?.check_in||!!row?.check_out;$("myStatus").textContent=!row?"لم تسجل حضورك اليوم":row.check_out?"تم تسجيل الانصراف": "تم تسجيل الحضور "+fmtTime(row.check_in);$("lateNoteBox").classList.toggle("hidden",!(row?.status==="late"&&row.check_in));$("lateNoteInput").value=row?.late_note||"";$("saveLateNoteBtn").disabled=false;$("saveLateNoteBtn").textContent=row?.late_note?"تحديث الملاحظة":"إرسال الملاحظة"}
@@ -112,7 +154,7 @@ $("logoutBtn")?.addEventListener("click",async()=>{if(db)await db.auth.signOut()
 document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.page)));document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.goto)));
 $("checkInBtn").addEventListener("click",()=>doAttendance("in"));$("checkOutBtn").addEventListener("click",()=>doAttendance("out"));$("saveLateNoteBtn").addEventListener("click",saveLateNote);
 document.querySelectorAll('input[name="method"]').forEach(r=>r.addEventListener("change",()=>{$("qrArea").classList.toggle("hidden",getMethod()!=="qr")}));
-$("scanBtn").addEventListener("click",startScan);$("generateQr").addEventListener("click",generateQR);$("entryScanBtn").addEventListener("click",startEntryScan);$("adminEntryBtn").addEventListener("click",()=>{adminLoginBypass=true;$("entryGate").classList.add("hidden");$("loginForm").classList.remove("hidden")});$("settingsForm").addEventListener("submit",saveSettings);$("useMyLocation").addEventListener("click",useMyLocationForMap);$("employeeForm").addEventListener("submit",addEmployee);$("employeeRows").addEventListener("click",e=>{const b=e.target.closest(".employee-toggle");if(b)toggleEmployee(b.dataset.id,b.dataset.active==="true")});$("filterBtn").addEventListener("click",loadReports);$("exportBtn").addEventListener("click",exportCSV);$("leaveForm").addEventListener("submit",submitLeave);$("leaveRows").addEventListener("click",e=>{const b=e.target.closest(".leave-review");if(b)reviewLeave(b.dataset.id,b.dataset.decision)});$("payrollForm").addEventListener("submit",addPayrollAdjustment);$("payrollRefresh").addEventListener("click",loadPayroll);$("notificationsRefresh").addEventListener("click",loadNotifications);$("notificationRows").addEventListener("click",async e=>{const b=e.target.closest(".notification-read");if(!b)return;const r=await db.rpc("mark_notification_read",{p_id:b.dataset.id});if(r.error)fail(r.error.message);else loadNotifications()});$("payMonth").value=localISODate().slice(0,7);
+$("scanBtn").addEventListener("click",startScan);$("generateQr").addEventListener("click",generateQR);$("entryScanBtn").addEventListener("click",startEntryScan);$("adminEntryBtn").addEventListener("click",()=>{adminLoginBypass=true;$("entryGate").classList.add("hidden");$("loginForm").classList.remove("hidden")});$("settingsForm").addEventListener("submit",saveSettings);$("useMyLocation").addEventListener("click",useMyLocationForMap);$("employeeForm").addEventListener("submit",addEmployee);$("employeeRows").addEventListener("click",e=>{const b=e.target.closest(".employee-toggle");if(b)toggleEmployee(b.dataset.id,b.dataset.active==="true")});$("filterBtn").addEventListener("click",loadReports);$("exportBtn").addEventListener("click",exportCSV);$("leaveForm").addEventListener("submit",submitLeave);$("leaveRows").addEventListener("click",e=>{const b=e.target.closest(".leave-review");if(b)reviewLeave(b.dataset.id,b.dataset.decision)});$("payrollForm").addEventListener("submit",addPayrollAdjustment);$("payrollRefresh").addEventListener("click",loadPayroll);$("notificationsRefresh").addEventListener("click",loadNotifications);$("enableNotificationsBtn")?.addEventListener("click",enableDeviceNotifications);$("notificationRows").addEventListener("click",async e=>{const b=e.target.closest(".notification-read");if(!b)return;const r=await db.rpc("mark_notification_read",{p_id:b.dataset.id});if(r.error)fail(r.error.message);else loadNotifications()});$("payMonth").value=localISODate().slice(0,7);
 setupPWA();setInterval(clock,1000);clock();
 if(db){
  db.auth.getSession().then(({data,error})=>{
